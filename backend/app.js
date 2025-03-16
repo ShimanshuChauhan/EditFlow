@@ -8,7 +8,7 @@ app.get('/home', (req, res) => {
 });
 
 app.get('*', (req, res, next) => {
-  res.send("Cannot GET " + req.url);
+  res.send('Cannot GET ' + req.url);
 });
 
 export default app;
