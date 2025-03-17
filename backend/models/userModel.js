@@ -23,15 +23,14 @@ const userSchema = new Schema({
   }],
   profilePic: {
     type: String,
-    default: '/images/profilePic.jpg',
   },
   googleId: {
     type: String,
-    unique: true,
+    unique: true
   },
   oauthTokens: {
     type: Map,
-    of: String,
+    of: String
   },
 }, { timestamps: true });
 
