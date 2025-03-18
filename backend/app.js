@@ -1,5 +1,8 @@
 import express from 'express';
 
+import AppError from './utils/appError.js';
+import globalErrorHandler from './controllers/errorController.js';
+
 const app = express();
 app.use(express.json());
 
@@ -8,7 +11,9 @@ app.get('/home', (req, res) => {
 });
 
 app.get('*', (req, res, next) => {
-  res.send('Cannot GET ' + req.url);
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
+
+app.use(globalErrorHandler);
 
 export default app;
