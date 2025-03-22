@@ -1,6 +1,6 @@
 import AppError from '../utils/appError.js';
 
-const setErrorDev = (err, res) => {
+const sendErrorDev = (err, res) => {
   res.status(err.statusCode).json({
     status: err.status,
     error: err,
