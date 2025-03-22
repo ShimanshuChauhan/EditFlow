@@ -16,10 +16,12 @@ const userSchema = new Schema({
   sharedProjects: [{
     type: Schema.Types.ObjectId,
     ref: 'Project',
+    default: []
   }],
   personalProjects: [{
     type: Schema.Types.ObjectId,
     ref: 'Project',
+    default: []
   }],
   profilePic: {
     type: String,

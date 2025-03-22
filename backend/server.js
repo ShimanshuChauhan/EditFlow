@@ -7,7 +7,8 @@ process.on('uncaughtException', (err) => {
   process.exit(1);
 });
 
-dotenv.config({ path: './config.env' });
+dotenv.config();
+
 import app from './app.js';
 
 if (!process.env.DATABASE || !process.env.DATABASE_PASSWORD) {
@@ -17,7 +18,8 @@ if (!process.env.DATABASE || !process.env.DATABASE_PASSWORD) {
 const DB = process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSWORD);
 const clientOptions = { serverApi: { version: '1', strict: true, deprecationErrors: true } };
 
-mongoose.connect(DB, clientOptions).then(() => console.log('DB connection successful!'));
+mongoose.connect(DB, clientOptions)
+  .then(() => console.log('DB connection successful!'));
 
 const port = process.env.PORT || 3000;
 const server = app.listen(port, () => {

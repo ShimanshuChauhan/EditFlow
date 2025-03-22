@@ -26,10 +26,16 @@
     "eslint-plugin-prettier": "^5.2.3",
     "eslint-plugin-promise": "^6.6.0",
     "globals": "^16.0.0",
+    "morgan": "^1.10.0",
     "nodemon": "^3.1.9",
     "prettier": "^3.5.3"
   },
   "dependencies": {
-    "mongoose": "^8.5.2"
+    "axios": "^1.8.4",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^16.4.7",
+    "googleapis": "^148.0.0",
+    "mongoose": "^8.5.2",
+    "open": "^10.1.0"
   }
 }
