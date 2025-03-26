@@ -6,8 +6,8 @@ import User from '../models/userModel.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
 
-dotenv.config({ path: './config.env' });
 const { decode } = jwt;
+dotenv.config({ path: './config.env' });
 
 const GOOGLE_AUTH_SCOPES = [
   'https://www.googleapis.com/auth/youtube.upload',
@@ -52,8 +52,9 @@ export const signUp = catchAsync(async (req, res) => {
 
 export const createUser = catchAsync(async (req, res, next) => {
   const code = req.query.code;
-  if (!code) {
-    return next(new AppError('No code received', 400));
+
+  if (req.query.error) {
+    return next(new AppError(req.query.error, 400));
   }
 
   const tokenResponse = await axios.post(process.env.GOOGLE_ACCESS_TOKEN_URL, {
@@ -68,7 +69,6 @@ export const createUser = catchAsync(async (req, res, next) => {
     }
   });
   const { access_token, refresh_token, id_token } = tokenResponse.data;
-  console.log('Tokens: ', { access_token, refresh_token, id_token });
   const { sub: googleId, email, name, picture } = decode(id_token);
   const newUser = await User.create({
     name: name,
