@@ -3,8 +3,15 @@ import dotenv from 'dotenv';
 dotenv.config({ path: './config.env' });
 
 const handleOAuthError = (err) => {
-  const message = 'Access denied. Please try again.';
+  // console.log(err);
+  const message = 'Access denied by the user, try again to continue!';
   return new AppError(message, 403);
+};
+
+const handleDuplicateFieldsDB = (err) => {
+  const value = err.errorResponse.errmsg.match(/(["'])(\\?.)*?\1/)[0];
+  const message = `Duplicate field value ${value}. Please use another value!`;
+  return new AppError(message, 400);
 };
 
 const sendErrorProd = (err, res) => {
@@ -38,15 +45,17 @@ export default function (err, req, res, next) {
   err.status = err.status || 'error';
 
   if (process.env.NODE_ENV === 'development') {
-    console.log(err.name);
     sendErrorDev(err, res);
   } else if (process.env.NODE_ENV === 'production') {
-    let error = { ...err };
+    let error = { ...err, message: err.message };
 
-    if (err.message === 'access_denied') {
+    console.log(error);
+    if (error.message === 'access_denied') {
       error = handleOAuthError(error);
     }
-
+    if (error.code === 11000) {
+      error = handleDuplicateFieldsDB(error);
+    }
     sendErrorProd(error, res);
   }
 };

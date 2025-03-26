@@ -8,7 +8,6 @@ process.on('uncaughtException', (err) => {
   process.exit(1);
 });
 
-
 import app from './app.js';
 
 if (!process.env.DATABASE || !process.env.DATABASE_PASSWORD) {

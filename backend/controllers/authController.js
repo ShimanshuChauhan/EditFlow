@@ -52,7 +52,6 @@ export const signUp = catchAsync(async (req, res) => {
 
 export const createUser = catchAsync(async (req, res, next) => {
   const code = req.query.code;
-
   if (req.query.error) {
     return next(new AppError(req.query.error, 400));
   }
@@ -70,16 +69,25 @@ export const createUser = catchAsync(async (req, res, next) => {
   });
   const { access_token, refresh_token, id_token } = tokenResponse.data;
   const { sub: googleId, email, name, picture } = decode(id_token);
-  const newUser = await User.create({
-    name: name,
-    email: email,
-    profilePic: picture,
-    googleId: googleId,
-    oauthTokens: new Map([
-      ['access_token', access_token],
-      ['refresh_token', refresh_token]
-    ])
-  });
+  const user = await User.findOne({ googleId });
 
-  createSendToken(newUser, 201, res);
+  if (user) {
+    user.oauthTokens.set('access_token', access_token);
+    user.oauthTokens.set('refresh_token', refresh_token);
+    await user.save();
+    createSendToken(user, 200, res);
+  }
+  else {
+    const newUser = await User.create({
+      name: name,
+      email: email,
+      profilePic: picture,
+      googleId: googleId,
+      oauthTokens: new Map([
+        ['access_token', access_token],
+        ['refresh_token', refresh_token]
+      ])
+    });
+    createSendToken(newUser, 201, res);
+  }
 });
