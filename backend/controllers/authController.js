@@ -6,7 +6,7 @@ import User from '../models/userModel.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
 
-const { decode } = jwt;
+const { decode, verify } = jwt;
 dotenv.config({ path: './config.env' });
 
 const GOOGLE_AUTH_SCOPES = [
@@ -90,4 +90,32 @@ export const createUser = catchAsync(async (req, res, next) => {
     });
     createSendToken(newUser, 201, res);
   }
+});
+
+export const protect = catchAsync(async (req, res, next) => {
+
+  let token;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+
+  if (!token) {
+    return next(
+      new AppError('You are not logged in! Please log in to get access.', 401)
+    );
+  }
+
+  const decoded = await verify(token, process.env.JWT_SECRET);
+
+  const currentUser = await User.findById(decoded.id);
+
+  if (!currentUser) {
+    return next(new AppError('The user belonging to this token does no longer exist.', 401));
+  }
+
+  req.user = currentUser;
+  next();
 });
