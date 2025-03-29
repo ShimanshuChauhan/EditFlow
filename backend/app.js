@@ -13,6 +13,10 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
+app.get('/', (req, res) => {
+  res.send('Server is running');
+});
+
 app.use('/api/v1/users', userRouter);
 
 app.get('*', (req, res, next) => {

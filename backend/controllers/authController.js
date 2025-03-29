@@ -70,8 +70,9 @@ export const createUser = catchAsync(async (req, res, next) => {
   const { access_token, refresh_token, id_token } = tokenResponse.data;
   const { sub: googleId, email, name, picture } = decode(id_token);
   const user = await User.findOne({ googleId });
-
+  console.log(id_token);
   if (user) {
+    console.log(access_token);
     user.oauthTokens.set('access_token', access_token);
     user.oauthTokens.set('refresh_token', refresh_token);
     await user.save();
@@ -95,11 +96,13 @@ export const createUser = catchAsync(async (req, res, next) => {
 export const protect = catchAsync(async (req, res, next) => {
 
   let token;
+  console.log(token);
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
+    console.log(token);
   }
 
   if (!token) {
