@@ -5,7 +5,7 @@ const { Schema, model } = mongoose;
 const projectSchema = new Schema({
   name: {
     type: String,
-    required: true,
+    required: [true, 'A project must have a name'],
   },
   ownerId: {
     type: Schema.Types.ObjectId,
@@ -18,7 +18,7 @@ const projectSchema = new Schema({
       ref: 'User',
     }, role: {
       type: String,
-      enum: ['ownwer', 'editor', 'viewer'],
+      enum: ['editor', 'viewer'],
       required: true
     },
   }],
