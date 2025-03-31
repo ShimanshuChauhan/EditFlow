@@ -10,7 +10,7 @@ const projectSchema = new Schema({
   ownerId: {
     type: Schema.Types.ObjectId,
     ref: 'User',
-    required: true,
+    required: [true, 'A project must have an owner'],
   },
   permissions: [{
     userId: {
