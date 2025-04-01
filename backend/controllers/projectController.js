@@ -1,4 +1,5 @@
 import Project from '../models/projectModel.js';
+import User from '../models/userModel.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
 
@@ -17,6 +18,10 @@ export const getAllProjects = catchAsync(async (req, res, next) => {
 export const createProject = catchAsync(async (req, res, next) => {
   const project = { ...req.body, ownerId: req.user._id };
   const newProject = await Project.create(project);
+
+  const user = await User.findById(req.user._id);
+  user.personalProjects.push(newProject._id);
+  await user.save();
 
   res.status(201).json({
     status: 'success',
@@ -65,6 +70,10 @@ export const deleteProject = catchAsync(async (req, res, next) => {
   if (!project) {
     return next(new AppError('No project found with that ID', 404));
   }
+
+  const user = await User.findById(req.user._id);
+  user.personalProjects = user.personalProjects.filter((projectId) => projectId.toString() !== req.params.id);
+  await user.save();
 
   res.status(204).json({
     status: 'success',
