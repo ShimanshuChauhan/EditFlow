@@ -3,6 +3,7 @@ import axios from 'axios';
 import jwt from 'jsonwebtoken';
 
 import User from '../models/userModel.js';
+import Project from '../models/projectModel.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
 
@@ -101,7 +102,7 @@ export const protect = catchAsync(async (req, res, next) => {
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
-    console.log(token);
+    // console.log(token);
   }
 
   if (!token) {
@@ -123,10 +124,37 @@ export const protect = catchAsync(async (req, res, next) => {
 });
 
 export const restrictTo = (...roles) => {
-  return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
+  return catchAsync(async (req, res, next) => {
+    const userId = req.user._id.toString();
+    const project = await Project.findById(req.params.projectId);
+    const projectOwnerId = project.ownerId.toString();
+    if (!project) {
+      return next(new AppError('No project found with that ID', 404));
+    }
+
+    let isAuthorized = false;
+
+    for (let role of roles) {
+      // console.log(role);
+      if (role === 'owner' && projectOwnerId === userId) {
+        // console.log("owner id matched");
+        isAuthorized = true;
+        break;
+      }
+      if (role === 'editor' && project.permissions.some((permission) => permission.userId.toString() === userId && permission.role === 'editor')) {
+        // console.log("editor matched");
+        isAuthorized = true;
+        break;
+      }
+      if (role === 'viewer' && project.permissions.some((permission) => permission.userId.toString() === userId && permission.role === 'viewer')) {
+        // console.log("viewer matched");
+        isAuthorized = true;
+        break;
+      }
+    }
+    if (!isAuthorized) {
       return next(new AppError('You do not have permission to perform this action', 403));
     }
     next();
-  };
+  });
 };

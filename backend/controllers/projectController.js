@@ -32,7 +32,7 @@ export const createProject = catchAsync(async (req, res, next) => {
 });
 
 export const getProject = catchAsync(async (req, res, next) => {
-  const project = await Project.findById(req.params.id);
+  const project = await Project.findById(req.params.projectId);
   if (!project) {
     return next(new AppError('No project found with that ID', 404));
   }
@@ -48,7 +48,7 @@ export const getProject = catchAsync(async (req, res, next) => {
 });
 
 export const updateProject = catchAsync(async (req, res, next) => {
-  const project = await Project.findByIdAndUpdate(req.params.id, req.body, {
+  const project = await Project.findByIdAndUpdate(req.params.projectId, req.body, {
     new: true,
     runValidators: true
   });
@@ -66,13 +66,13 @@ export const updateProject = catchAsync(async (req, res, next) => {
 });
 
 export const deleteProject = catchAsync(async (req, res, next) => {
-  const project = await Project.findByIdAndDelete(req.params.id);
+  const project = await Project.findByIdAndDelete(req.params.projectId);
   if (!project) {
     return next(new AppError('No project found with that ID', 404));
   }
 
   const user = await User.findById(req.user._id);
-  user.personalProjects = user.personalProjects.filter((projectId) => projectId.toString() !== req.params.id);
+  user.personalProjects = user.personalProjects.filter((projectId) => projectId.toString() !== req.params.projectId);
   await user.save();
 
   res.status(204).json({
