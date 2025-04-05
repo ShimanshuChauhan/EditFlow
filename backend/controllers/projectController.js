@@ -81,13 +81,21 @@ export const deleteProject = catchAsync(async (req, res, next) => {
   });
 });
 
-//TODO: Implement this function
+
 export const updatePermissions = catchAsync(async (req, res, next) => {
   let project = await Project.findById(req.params.projectId);
+
+  if (!project) {
+    return next(new AppError('No project found with that ID', 404));
+  }
 
   const { userId, role } = req.body;
 
   const user = await User.findById(userId);
+  if (!user) {
+    return next(new AppError('No user found with that ID', 404));
+  }
+
   const existingPermission = project.permissions.find(
     (permission) => permission.userId.toString() === userId
   );
@@ -99,13 +107,7 @@ export const updatePermissions = catchAsync(async (req, res, next) => {
   }
 
   await project.save();
-  if (!user) {
-    return next(new AppError('No user found with that ID', 404));
-  }
 
-  if (!project) {
-    return next(new AppError('No project found with that ID', 404));
-  }
 
   return res.status(200).json({
     status: 'success',
