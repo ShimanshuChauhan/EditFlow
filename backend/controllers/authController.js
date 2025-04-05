@@ -71,9 +71,9 @@ export const createUser = catchAsync(async (req, res, next) => {
   const { access_token, refresh_token, id_token } = tokenResponse.data;
   const { sub: googleId, email, name, picture } = decode(id_token);
   const user = await User.findOne({ googleId });
-  console.log(id_token);
+  // console.log(id_token);
   if (user) {
-    console.log(access_token);
+    // console.log(access_token);
     user.oauthTokens.set('access_token', access_token);
     user.oauthTokens.set('refresh_token', refresh_token);
     await user.save();
@@ -127,10 +127,10 @@ export const restrictTo = (...roles) => {
   return catchAsync(async (req, res, next) => {
     const userId = req.user._id.toString();
     const project = await Project.findById(req.params.projectId);
-    const projectOwnerId = project.ownerId.toString();
     if (!project) {
       return next(new AppError('No project found with that ID', 404));
     }
+    const projectOwnerId = project.ownerId.toString();
 
     let isAuthorized = false;
 
