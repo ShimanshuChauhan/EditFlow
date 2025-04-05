@@ -3,7 +3,7 @@ import User from '../models/userModel.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
 
-export const getAllProjects = catchAsync(async (req, res, next) => {
+export const getAllProjects = catchAsync(async (req, res) => {
   const projects = await Project.find();
 
   res.status(200).json({
@@ -15,7 +15,7 @@ export const getAllProjects = catchAsync(async (req, res, next) => {
   });
 });
 
-export const createProject = catchAsync(async (req, res, next) => {
+export const createProject = catchAsync(async (req, res) => {
   const project = { ...req.body, ownerId: req.user._id };
   const newProject = await Project.create(project);
 
@@ -78,5 +78,39 @@ export const deleteProject = catchAsync(async (req, res, next) => {
   res.status(204).json({
     status: 'success',
     data: null
+  });
+});
+
+//TODO: Implement this function
+export const updatePermissions = catchAsync(async (req, res, next) => {
+  let project = await Project.findById(req.params.projectId);
+
+  const { userId, role } = req.body;
+
+  const user = await User.findById(userId);
+  const existingPermission = project.permissions.find(
+    (permission) => permission.userId.toString() === userId
+  );
+
+  if (existingPermission) {
+    existingPermission.role = role;
+  } else {
+    project.permissions.push({ userId, role });
+  }
+
+  await project.save();
+  if (!user) {
+    return next(new AppError('No user found with that ID', 404));
+  }
+
+  if (!project) {
+    return next(new AppError('No project found with that ID', 404));
+  }
+
+  return res.status(200).json({
+    status: 'success',
+    data: {
+      message: 'Permissions updated successfully'
+    }
   });
 });

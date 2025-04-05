@@ -6,7 +6,7 @@ export default [
   {
     rules: {
       // Best Practices
-      'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }], // Warn for unused vars, ignore "_" prefix
+      'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePatten: '^process$' }], // Warn for unused vars, ignore "_" prefix
       'no-undef': 'warn', // Warn for undefined variables
       'no-console': 'warn', // Warn when using console.log
       'eqeqeq': ['error', 'always'], // Enforce strict equality (`===` and `!==`)

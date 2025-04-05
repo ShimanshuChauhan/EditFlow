@@ -1,7 +1,7 @@
 import express from 'express';
 
 import { protect, restrictTo } from '../controllers/authController.js';
-import { getAllProjects, createProject, getProject, updateProject, deleteProject } from '../controllers/projectController.js';
+import { getAllProjects, createProject, getProject, updateProject, deleteProject, updatePermissions } from '../controllers/projectController.js';
 
 const router = express.Router();
 
@@ -25,5 +25,9 @@ router
   .get(restrictTo('owner', 'editor', 'viewer'), getProject)
   .patch(restrictTo('owner', 'editor'), updateProject)
   .delete(restrictTo('owner'), deleteProject);
+
+router
+  .route('/:projectId/permissions')
+  .patch(restrictTo('owner'), updatePermissions);
 
 export default router;
