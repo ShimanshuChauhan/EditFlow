@@ -32,3 +32,51 @@ export const createFolder = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+export const getFolder = catchAsync(async (req, res, next) => {
+  const folder = await Folder.findById(req.params.folderId);
+
+  if (!folder) {
+    return next(new AppError('No folder found with that ID', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      folder,
+    },
+  });
+});
+
+export const createSubFolder = catchAsync(async (req, res, next) => {
+  const parentFolderId = req.params.folderId;
+  const { name } = req.body;
+
+  const parentFolder = await Folder.findById(parentFolderId);
+
+  if (!parentFolder) {
+    return next(new AppError('No folder found with that ID', 404));
+  }
+
+  const subFolder = {
+    name,
+    projectId: parentFolder.projectId,
+    parentFolderId,
+  }
+
+  const newSubFolder = await Folder.create(subFolder);
+
+  if (!newSubFolder) {
+    return next(new AppError('Error creating subfolder', 400));
+  }
+
+  parentFolder.folders.push(newSubFolder._id);
+  await parentFolder.save();
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      parentFolder,
+    },
+  })
+});
