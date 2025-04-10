@@ -1,5 +1,6 @@
 import express from 'express';
 
+import folderRouter from './folderRoutes.js';
 import { protect, restrictTo } from '../controllers/authController.js';
 import { getAllProjects, createProject, getProject, updateProject, deleteProject, updatePermissions } from '../controllers/projectController.js';
 
@@ -9,6 +10,8 @@ const router = express.Router();
   router.use(protect);
   router.use(restrictTo('admin'));
 */
+
+router.use('/:projectId/folders', folderRouter);
 
 router
   .route('/')
