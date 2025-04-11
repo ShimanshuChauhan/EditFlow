@@ -4,6 +4,15 @@ import User from '../models/userModel.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
 
+const deleteSubFolers = catchAsync(async (folderId) => {
+  const subFolders = await Folder.findByIdAndDelete(folderId);
+  if (!subFolders) return;
+
+  for (const subFolderId of subFolders.folders) {
+    await deleteSubFolers(subFolderId);
+  }
+});
+
 export const createFolder = catchAsync(async (req, res, next) => {
   const parentProjectId = req.params.projectId;
   const { name } = req.body;
@@ -79,4 +88,26 @@ export const createSubFolder = catchAsync(async (req, res, next) => {
       parentFolder,
     },
   })
+});
+
+export const deleteFolder = catchAsync(async (req, res, next) => {
+  const folderId = req.params.folderId;
+  const folder = await Folder.findById(folderId);
+
+  if (!folder) {
+    return next(new AppError('No folder found with that ID', 404));
+  }
+
+  if (!folder.parentFolderId) {
+    const project = await Project.findById(folder.projectId);
+    project.folders = project.folders.filter((folder) => folder.toString() !== folderId.toString());
+    await project.save();
+  }
+
+  await deleteSubFolers(folderId);
+
+  res.status(204).json({
+    status: 'success',
+    data: null,
+  });
 });
