@@ -111,3 +111,21 @@ export const deleteFolder = catchAsync(async (req, res, next) => {
     data: null,
   });
 });
+
+export const updateFolder = catchAsync(async (req, res, next) => {
+  const folder = await Folder.findByIdAndUpdate(req.params.folderId, req.body, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!folder) {
+    return next(new AppError('No folder found with that ID', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      folder,
+    },
+  });
+});
