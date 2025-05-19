@@ -4,12 +4,12 @@ import User from '../models/userModel.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
 
-const deleteSubFolers = catchAsync(async (folderId) => {
+export const deleteSubFolders = catchAsync(async (folderId) => {
   const subFolders = await Folder.findByIdAndDelete(folderId);
   if (!subFolders) return;
 
   for (const subFolderId of subFolders.folders) {
-    await deleteSubFolers(subFolderId);
+    await deleteSubFolders(subFolderId);
   }
 });
 
@@ -104,7 +104,7 @@ export const deleteFolder = catchAsync(async (req, res, next) => {
     await project.save();
   }
 
-  await deleteSubFolers(folderId);
+  await deleteSubFolders(folderId);
 
   res.status(204).json({
     status: 'success',
