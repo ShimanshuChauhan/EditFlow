@@ -1,7 +1,9 @@
 import Project from '../models/projectModel.js';
+import Folder from '../models/folderModel.js';
 import User from '../models/userModel.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
+import { deleteSubFolders } from './folderController.js';
 
 export const getAllProjects = catchAsync(async (req, res) => {
   const projects = await Project.find();
@@ -88,6 +90,10 @@ export const deleteProject = catchAsync(async (req, res, next) => {
 
   await Promise.all(sharedUser.map((user) => user.save()));
   await user.save();
+
+  await Promise.all(project.folders.map(async (folderId) => {
+    await deleteSubFolders(folderId);
+  }));
 
   res.status(204).json({
     status: 'success',
