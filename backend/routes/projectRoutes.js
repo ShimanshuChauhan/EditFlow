@@ -1,6 +1,7 @@
 import express from 'express';
 
 import folderRouter from './folderRoutes.js';
+import videoRouter from './videoRoutes.js';
 import { protect, restrictTo } from '../controllers/authController.js';
 import { getAllProjects, createProject, getProject, updateProject, deleteProject, updatePermissions } from '../controllers/projectController.js';
 
@@ -12,6 +13,7 @@ const router = express.Router();
 */
 
 router.use('/:projectId/folders', folderRouter);
+router.use('/:projectId/videos', videoRouter);
 
 router
   .route('/')
