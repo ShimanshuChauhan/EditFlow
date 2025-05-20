@@ -11,6 +11,10 @@ const videoSchema = new Schema({
     type: String,
     required: true
   },
+  publicId: {
+    type: String,
+    required: true
+  },
   projectId: {
     type: Schema.Types.ObjectId,
     ref: 'Project',
@@ -18,9 +22,10 @@ const videoSchema = new Schema({
   },
   folderId: {
     type: Schema.Types.ObjectId,
-    ref: 'Folder'
+    ref: 'Folder',
+    default: null
   },
-  createdBy: {
+  uploadedBy: {
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: true

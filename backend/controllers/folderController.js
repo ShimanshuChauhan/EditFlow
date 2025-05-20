@@ -1,6 +1,5 @@
 import Project from '../models/projectModel.js';
 import Folder from '../models/folderModel.js';
-import User from '../models/userModel.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
 

@@ -15,6 +15,7 @@ const folderSchema = new Schema({
   parentFolderId: {
     type: Schema.Types.ObjectId,
     ref: 'Folder'
+    // FIXME: 'By default, this should be null'
   },
   folders: [{
     type: Schema.Types.ObjectId,
