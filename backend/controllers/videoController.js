@@ -79,3 +79,18 @@ export const uploadVideo = [
     });
   }),
 ];
+
+export const getVideo = catchAsync(async (req, res, next) => {
+  const video = await videoModel.findById(req.params.videoId);
+
+  if (!video) {
+    return next(new AppError('No video found with that ID', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      video
+    }
+  })
+});
