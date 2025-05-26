@@ -101,6 +101,10 @@ export const deleteFolder = catchAsync(async (req, res, next) => {
     const project = await Project.findById(folder.projectId);
     project.folders = project.folders.filter((folder) => folder.toString() !== folderId.toString());
     await project.save();
+  } else {
+    const parentFolder = await Folder.findById(folder.parentFolderId);
+    parentFolder.folders = parentFolder.folders.filter((folder) => folder.toString() !== folderId.toString());
+    await parentFolder.save();
   }
 
   await deleteSubFolders(folderId);
