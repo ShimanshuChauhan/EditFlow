@@ -49,8 +49,8 @@ export const uploadVideo = [
       const stream = cloudinary.v2.uploader.upload_stream(
         {
           resource_type: 'video',
-          folder: `projects/${parentProject._id}/videos`,
-          public_id: `${Date.now()}${videoName || videoFile.originalname}`,
+          folder: `${parentProject._id}`,
+          public_id: `${Date.now()}-${videoName || videoFile.originalname}`,
           overwrite: true,
         },
         (error, result) => {
@@ -104,11 +104,11 @@ export const uploadVideoInFolder = [upload.single('video'), catchAsync(async (re
   const folder = await Folder.findById(folderId);
 
   if (!folder) {
-    return next(AppError('No Folder found with that ID', 404));
+    return next(new AppError('No Folder found with that ID', 404));
   }
 
   if (!videoFile) {
-    return next(AppError('No video file found', 400));
+    return next(new AppError('No video file found', 400));
   }
 
   const bufferStream = Readable.from(videoFile.buffer);
@@ -118,8 +118,8 @@ export const uploadVideoInFolder = [upload.single('video'), catchAsync(async (re
     const stream = cloudinary.v2.uploader.upload_stream(
       {
         resource_type: 'video',
-        folder: `projects/${folder.projectId}/videos`,
-        public_id: `${Date.now()}${videoName || videoFile.originalname}`,
+        folder: `${folder.projectId}/${folder._id}`,
+        public_id: `${Date.now()}-${videoName || videoFile.originalname}`,
         overwrite: true,
       },
       (error, result) => {
