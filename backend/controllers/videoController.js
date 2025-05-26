@@ -5,6 +5,7 @@ import videoModel from '../models/videoModel.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
 import Project from '../models/projectModel.js';
+import Folder from '../models/folderModel.js';
 
 // Configure Cloudinary
 cloudinary.v2.config({
@@ -94,3 +95,61 @@ export const getVideo = catchAsync(async (req, res, next) => {
     }
   })
 });
+
+export const uploadVideoInFolder = [upload.single('video'), catchAsync(async (req, res, next) => {
+  const { folderId } = req.params;
+  const { videoName } = req.body;
+  const videoFile = req.file;
+
+  const folder = await Folder.findById(folderId);
+
+  if (!folder) {
+    return next(AppError('No Folder found with that ID', 404));
+  }
+
+  if (!videoFile) {
+    return next(AppError('No video file found', 400));
+  }
+
+  const bufferStream = Readable.from(videoFile.buffer);
+
+  // Upload to Cloudinary using upload_stream
+  const result = await new Promise((resolve, reject) => {
+    const stream = cloudinary.v2.uploader.upload_stream(
+      {
+        resource_type: 'video',
+        folder: `projects/${folder.projectId}/videos`,
+        public_id: `${Date.now()}${videoName || videoFile.originalname}`,
+        overwrite: true,
+      },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      }
+    );
+    bufferStream.pipe(stream);
+  });
+
+  const video = await videoModel.create({
+    name: videoName || videoFile.originalname,
+    videoUrl: result.secure_url,
+    publicId: result.public_id,
+    projectId: folder.projectId,
+    folderId: folder._id,
+    uploadedBy: req.user._id,
+  });
+
+  if (!video) {
+    return next(new AppError('Error uploading the video'));
+  }
+
+  folder.videos.push(video._id);
+  await folder.save();
+
+  res.status(201).json({
+    status: 'success',
+    data: {
+      video
+    }
+  })
+})];
