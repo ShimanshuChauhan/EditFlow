@@ -6,6 +6,9 @@ import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
 import Project from '../models/projectModel.js';
 import Folder from '../models/folderModel.js';
+import { stat, Stats } from 'fs';
+import { profileEnd } from 'console';
+import Video from '../models/videoModel.js';
 
 // Configure Cloudinary
 cloudinary.v2.config({
@@ -118,7 +121,7 @@ export const uploadVideoInFolder = [upload.single('video'), catchAsync(async (re
     const stream = cloudinary.v2.uploader.upload_stream(
       {
         resource_type: 'video',
-        folder: `${folder.projectId}/${folder._id}`,
+        folder: `${folder.projectId}`,
         public_id: `${Date.now()}-${videoName || videoFile.originalname}`,
         overwrite: true,
       },
@@ -153,3 +156,44 @@ export const uploadVideoInFolder = [upload.single('video'), catchAsync(async (re
     }
   })
 })];
+
+export const deleteVideo = catchAsync(async (req, res, next) => {
+  const { projectId, videoId } = req.params;
+
+  const video = await Video.findByIdAndDelete(videoId);
+  if (!video) {
+    return next(new AppError('No video found with that ID', 404));
+  }
+
+  const { publicId } = video;
+
+  try {
+    const result = await cloudinary.v2.uploader.destroy(publicId, { resource_type: "video" });
+    if (result.result !== 'ok')
+      return next(new AppError('Failed to delete video from Cloudinary', 500));
+  }
+  catch (error) {
+    return next(new AppError(`Cloudinary deletion failed: ${error.message}`, error.http_code || 500));
+  }
+
+  if (!video.folderId) {
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return next(new AppError('No project found with that ID', 404));
+    }
+    project.videos = project.videos.filter((video) => video.toString() !== videoId.toString());
+    await project.save();
+  }
+  else {
+    const parentFolder = await Folder.findById(video.folderId);
+    if (!parentFolder) {
+      return new AppError('No folder found with that Id', 404);
+    }
+    const updatedFolder = parentFolder.folders((folder) => folder.toString() !== video.folderId);
+    await updatedFolder.save();
+  }
+
+  res.json(201).status({
+    status: 'success'
+  })
+});
