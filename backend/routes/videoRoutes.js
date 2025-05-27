@@ -1,7 +1,7 @@
 import express from "express";
 
 import { protect, restrictTo } from "../controllers/authController.js";
-import { getVideo, uploadVideo, uploadVideoInFolder } from "../controllers/videoController.js";
+import { deleteVideo, getVideo, uploadVideo, uploadVideoInFolder } from "../controllers/videoController.js";
 
 const router = express.Router({ mergeParams: true });
 
@@ -18,5 +18,6 @@ router
 router
   .route('/:videoId')
   .get(getVideo)
+  .delete(restrictTo("owner", "editor"), deleteVideo);
 
 export default router;
